@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stitch Keeper — Your Crochet Link Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F0E6;
+    --card:#FFFFFF;
+    --ink:#242A1B;
+    --ink-soft:#6A6D5A;
+    --moss:#55692F;
+    --moss-deep:#3E4E22;
+    --moss-tint:#E6EAD6;
+    --moss-tint-2:#DCE3C9;
+    --line:#E5E1D2;
+    --danger:#B0472E;
+    --danger-tint:#F3DED8;
+    --radius-lg:22px;
+    --radius-md:16px;
+    --radius-sm:10px;
+    --shadow: 0 1px 2px rgba(36,42,27,0.04), 0 6px 20px rgba(36,42,27,0.06);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Nunito Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  h1,h2,h3{
+    font-family:'Fredoka', 'Nunito Sans', sans-serif;
+    margin:0;
+    color:var(--ink);
+    letter-spacing:-0.01em;
+  }
+  button{font-family:inherit;}
+  a{color:inherit;}
+  ::selection{background:var(--moss-tint-2);}
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible{
+    outline: 2.5px solid var(--moss);
+    outline-offset: 2px;
+  }
+
+  .app-shell{
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px 18px 100px;
+  }
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+    margin-bottom: 22px;
+    min-height: 52px;
+  }
+  .topbar-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:0;
+  }
+  .icon-btn{
+    width:44px; height:44px;
+    border-radius:50%;
+    border:none;
+    background:var(--card);
+    box-shadow: var(--shadow);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    color:var(--moss-deep);
+    flex-shrink:0;
+    transition: transform .12s ease, background .15s ease;
+  }
+  .icon-btn:hover{ background:var(--moss-tint); }
+  .icon-btn:active{ transform: scale(0.94); }
+  .icon-btn svg{width:20px;height:20px;}
+
+  #viewTitle{
+    font-size: 28px;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .topbar-actions{
+    display:flex;
+    gap:10px;
+    flex-shrink:0;
+  }
+  .pill-btn{
+    display:flex; align-items:center; gap:8px;
+    background:var(--card);
+    border:none;
+    border-radius:999px;
+    padding: 11px 18px;
+    font-weight:700;
+    font-size:14.5px;
+    color:var(--moss-deep);
+    box-shadow:var(--shadow);
+    cursor:pointer;
+    transition: transform .12s ease, background .15s ease;
+    white-space:nowrap;
+  }
+  .pill-btn.primary{
+    background:var(--moss);
+    color:#fff;
+  }
+  .pill-btn:hover{ background:var(--moss-tint); }
+  .pill-btn.primary:hover{ background:var(--moss-deep); }
+  .pill-btn:active{ transform:scale(0.96); }
+  .pill-btn svg{width:17px;height:17px;flex-shrink:0;}
+
+  /* ---------- Search ---------- */
+  .search-wrap{
+    position:relative;
+    margin-bottom:20px;
+  }
+  .search-wrap svg{
+    position:absolute; left:16px; top:50%; transform:translateY(-50%);
+    width:18px;height:18px; color:var(--ink-soft);
+    pointer-events:none;
+  }
+  .search-input{
+    width:100%;
+    padding:13px 16px 13px 44px;
+    border-radius:999px;
+    border:1.5px solid var(--line);
+    background:var(--card);
+    font-size:15px;
+    color:var(--ink);
+    font-family:inherit;
+  }
+  .search-input::placeholder{ color:var(--ink-soft); }
+
+  /* ---------- Section label ---------- */
+  .section-label{
+    font-size:26px;
+    font-weight:600;
+    margin: 26px 0 14px;
+  }
+  .section-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin: 26px 0 14px;
+  }
+
+  /* ---------- All Stitches banner ---------- */
+  .all-card{
+    display:flex; align-items:center; gap:16px;
+    background:var(--card);
+    border-radius:var(--radius-lg);
+    padding:18px 20px;
+    box-shadow:var(--shadow);
+    cursor:pointer;
+    border:none;
+    width:100%;
+    text-align:left;
+    margin-bottom:6px;
+  }
+  .all-card:hover{ background:var(--moss-tint); }
+  .all-card .badge{
+    width:52px;height:52px;border-radius:50%;
+    background:var(--moss-tint);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--moss-deep);
+    flex-shrink:0;
+  }
+  .all-card .badge svg{width:24px;height:24px;}
+  .all-card .meta{min-width:0;}
+  .all-card .meta .name{font-family:'Fredoka';font-weight:600;font-size:18px;}
+  .all-card .meta .count{color:var(--ink-soft);font-size:14px;margin-top:2px;}
+
+  /* ---------- Folder grid ---------- */
+  .folder-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap:6px 4px;
+  }
+  .folder-item{
+    position:relative;
+    background:none;
+    border-radius: var(--radius-md);
+    padding:10px 6px 12px;
+    cursor:pointer;
+    border:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    text-align:center;
+    transition: background .15s ease;
+  }
+  .folder-item:hover{ background:var(--moss-tint); }
+  .folder-item .folder-icon{
+    width:60px;height:60px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--moss);
+    flex-shrink:0;
+  }
+  .folder-item .folder-icon svg{width:56px;height:56px;}
+  .folder-item .folder-label{
+    display:flex; align-items:center; gap:4px;
+    max-width:100%;
+  }
+  .folder-item .name{
+    font-family:'Fredoka'; font-weight:600; font-size:15px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    max-width:118px;
+  }
+  .folder-item .count{ color:var(--ink-soft); font-size:12.5px; }
+  .folder-item .menu-btn{
+    width:26px;height:26px;border-radius:50%;
+    border:none; background:transparent;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-soft);
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .folder-item .menu-btn:hover{ background:rgba(0,0,0,0.08); color:var(--ink); }
+  .folder-item .menu-btn svg{width:16px;height:16px;}
+
+  .empty-state{
+    background:var(--card);
+    border-radius:var(--radius-lg);
+    padding: 40px 24px;
+    text-align:center;
+    box-shadow:var(--shadow);
+    color:var(--ink-soft);
+  }
+  .empty-state svg{width:38px;height:38px;color:var(--moss);margin-bottom:12px;}
+  .empty-state .title{ font-family:'Fredoka'; font-weight:600; color:var(--ink); font-size:18px; margin-bottom:6px; }
+  .empty-state .sub{font-size:14.5px; line-height:1.5; max-width:340px; margin:0 auto;}
+
+  /* ---------- Item list (inside a folder) ---------- */
+  .item-list{
+    background:var(--card);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .item-row{
+    display:flex; align-items:center; gap:14px;
+    padding:14px 16px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    position:relative;
+  }
+  .item-row:last-child{ border-bottom:none; }
+  .item-row:hover{ background:var(--moss-tint); }
+  .item-thumb{
+    width:56px;height:56px;border-radius:12px;
+    background:var(--moss-tint);
+    flex-shrink:0;
+    overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .item-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .item-thumb .fav{width:26px;height:26px;object-fit:contain;}
+  .item-thumb .play-badge{
+    position:absolute; inset:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(0,0,0,0.18);
+  }
+  .item-thumb .play-badge svg{width:20px;height:20px;color:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));}
+  .item-info{min-width:0; flex:1;}
+  .item-title{
+    font-weight:700; font-size:15.5px; line-height:1.3;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .item-sub{ color:var(--ink-soft); font-size:13px; margin-top:4px; display:flex; align-items:center; gap:6px;}
+  .item-sub .folder-tag{
+    background:var(--moss-tint); color:var(--moss-deep);
+    padding:2px 8px; border-radius:999px; font-weight:700; font-size:11.5px;
+  }
+  .chev{ color: var(--ink-soft); flex-shrink:0; width:18px; height:18px;}
+  .item-row-actions{
+    display:flex; gap:2px; flex-shrink:0;
+  }
+  .item-menu-btn{
+    width:34px;height:34px;border-radius:50%;
+    border:none;background:transparent;color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .item-menu-btn:hover{ background:rgba(0,0,0,0.06); color:var(--ink); }
+  .item-menu-btn svg{width:18px;height:18px;}
+
+  /* ---------- Floating add button ---------- */
+  .fab{
+    position:fixed;
+    right:24px; bottom:24px;
+    width:60px;height:60px;
+    border-radius:50%;
+    background:var(--moss);
+    color:#fff;
+    border:none;
+    box-shadow: 0 8px 20px rgba(63,79,34,0.35);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    z-index: 40;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .fab:hover{ background:var(--moss-deep); }
+  .fab:active{ transform:scale(0.92); }
+  .fab svg{width:26px;height:26px;}
+
+  /* ---------- Dropdown menu ---------- */
+  .dropdown{
+    position:absolute;
+    background:var(--card);
+    border-radius:14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    padding:6px;
+    min-width:160px;
+    z-index:100;
+  }
+  .dropdown button{
+    display:flex; align-items:center; gap:10px;
+    width:100%;
+    background:none; border:none;
+    padding:10px 12px;
+    border-radius:9px;
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--ink);
+    cursor:pointer;
+    text-align:left;
+  }
+  .dropdown button:hover{ background:var(--moss-tint); }
+  .dropdown button.danger{ color:var(--danger); }
+  .dropdown button.danger:hover{ background:var(--danger-tint); }
+  .dropdown svg{width:17px;height:17px;flex-shrink:0;}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(36,42,27,0.45);
+    display:flex; align-items:flex-end; justify-content:center;
+    z-index:200;
+    animation: fadeIn .15s ease;
+    padding: 0;
+  }
+  @media (min-width:640px){
+    .modal-overlay{ align-items:center; padding:20px; }
+  }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+  .modal{
+    background:var(--bg);
+    width:100%;
+    max-width:520px;
+    max-height:92vh;
+    overflow-y:auto;
+    border-radius: 24px 24px 0 0;
+    padding: 22px 22px 26px;
+    animation: slideUp .18s ease;
+  }
+  @media (min-width:640px){
+    .modal{ border-radius:24px; }
+  }
+  @keyframes slideUp{ from{ transform:translateY(24px); opacity:0;} to{ transform:translateY(0); opacity:1;} }
+  .modal-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .modal-head h2{ font-size:21px; font-weight:600; }
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block; font-weight:700; font-size:13.5px;
+    color:var(--ink-soft); margin-bottom:7px;
+  }
+  .field input[type=text],
+  .field input[type=url],
+  .field select{
+    width:100%;
+    padding:13px 14px;
+    border-radius:13px;
+    border:1.5px solid var(--line);
+    background:var(--card);
+    font-size:15.5px;
+    color:var(--ink);
+    font-family:inherit;
+  }
+  .field select{ appearance:none; background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%236A6D5A" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>'); background-repeat:no-repeat; background-position: right 14px center; background-size:16px; padding-right:38px;}
+  .field-hint{ font-size:12.5px; color:var(--ink-soft); margin-top:6px; }
+  .field-inline{ display:flex; gap:10px; }
+  .field-inline .field{ flex:1; }
+  .modal-actions{ display:flex; gap:10px; margin-top:20px; }
+  .btn{
+    flex:1;
+    padding:14px;
+    border-radius:14px;
+    border:none;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .btn.secondary{ background:var(--moss-tint); color:var(--moss-deep); }
+  .btn.secondary:hover{ background:var(--moss-tint-2); }
+  .btn.primary{ background:var(--moss); color:#fff; }
+  .btn.primary:hover{ background:var(--moss-deep); }
+  .btn.danger{ background:var(--danger); color:#fff; }
+  .btn.danger:hover{ background:#8f3722; }
+  .btn:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  /* ---------- Detail modal specifics ---------- */
+  .detail-media{
+    width:100%;
+    border-radius:18px;
+    overflow:hidden;
+    background:#000;
+    margin-bottom:18px;
+    position:relative;
+  }
+  .detail-media .yt-frame-wrap{ position:relative; padding-top:56.25%; }
+  .detail-media iframe{ position:absolute; inset:0; width:100%; height:100%; border:none; }
+  .detail-media .site-hero{
+    padding:44px 20px;
+    display:flex; flex-direction:column; align-items:center; gap:12px;
+    background:var(--moss-tint);
+  }
+  .detail-media .site-hero img{ width:56px; height:56px; object-fit:contain; }
+  .detail-media .site-hero .host{ color:var(--moss-deep); font-weight:700; font-size:14.5px; }
+  .detail-title{ font-size:22px; font-weight:600; line-height:1.3; margin-bottom:6px; }
+  .detail-sub{ color:var(--ink-soft); font-size:14px; margin-bottom:18px; }
+  .detail-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+  .detail-actions .btn{ flex:1 1 auto; min-width:120px; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .detail-actions .btn svg{width:17px;height:17px;}
+
+  /* ---------- Confirm modal ---------- */
+  .confirm-modal{ max-width:380px; text-align:center; padding:26px 22px; }
+  .confirm-modal .icon-wrap{
+    width:52px;height:52px;border-radius:50%;
+    background:var(--danger-tint); color:var(--danger);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 14px;
+  }
+  .confirm-modal .icon-wrap svg{ width:24px;height:24px; }
+  .confirm-modal h2{ font-size:19px; margin-bottom:8px; }
+  .confirm-modal p{ color:var(--ink-soft); font-size:14.5px; line-height:1.5; margin-bottom:20px; }
+
+  /* ---------- Footer utility ---------- */
+  .footer-utils{
+    display:flex; justify-content:center; gap:18px;
+    margin-top:44px;
+    flex-wrap:wrap;
+  }
+  .footer-utils button{
+    background:none; border:none;
+    color:var(--ink-soft);
+    font-size:13px; font-weight:700;
+    cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+    padding:8px;
+  }
+  .footer-utils button:hover{ color:var(--moss-deep); }
+  .footer-utils svg{ width:15px;height:15px; }
+  #importFile{ display:none; }
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:#fff;
+    padding:12px 20px; border-radius:999px;
+    font-size:14px; font-weight:700;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    z-index:300;
+    animation: toastIn .18s ease;
+  }
+  @keyframes toastIn{ from{opacity:0; transform:translate(-50%,10px);} to{opacity:1; transform:translate(-50%,0);} }
+
+  @media (max-width:480px){
+    #viewTitle{ font-size:24px; }
+    .section-label{ font-size:22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="icon-btn" id="backBtn" style="display:none;" aria-label="Go back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 id="viewTitle">My Stitches</h1>
+    </div>
+    <div class="topbar-actions" id="topbarActions"></div>
+  </header>
+
+  <main id="main"></main>
+
+  <div class="footer-utils" id="footerUtils">
+    <button id="exportBtn" title="Save a backup file of everything you've stored">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13m0 0l-4-4m4 4l4-4M4 19h16"/></svg>
+      Backup data
+    </button>
+    <button id="importBtn" title="Restore from a backup file">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V8m0 0l-4 4m4-4l4 4M4 5h16"/></svg>
+      Restore backup
+    </button>
+    <input type="file" id="importFile" accept="application/json">
+  </div>
+</div>
+
+<button class="fab" id="fabAdd" aria-label="Save a new stitch link">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ ICONS ============ */
+  const ICONS = {
+    folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>',
+    folderPlus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M12 11v4M10 13h4"/></svg>',
+    grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+    chevRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
+    dots: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+    pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>',
+    move: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3"/><path d="M9 5l3-3 3 3"/><path d="M15 19l3 3 3-3"/><path d="M19 9l3 3-3 3"/><path d="M2 12h20M12 2v20"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+    externalLink: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>',
+    play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',
+    link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.5-1.5"/></svg>',
+    globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>'
+  };
+
+  /* ============ STATE / STORAGE ============ */
+  const STORAGE_KEY = 'stitchKeeper_v1';
+  let state = { folders: [], items: [] };
+  let applyingRemote = false; // true while we're writing data that came FROM the cloud, so we don't loop it back
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){ state = JSON.parse(raw); }
+    }catch(e){ console.warn('Could not read saved data', e); }
+    if(!state.folders) state.folders = [];
+    if(!state.items) state.items = [];
+  }
+  function saveLocalOnly(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }catch(e){
+      showToast("Couldn't save — your browser storage may be full.");
+    }
+  }
+  function saveState(){
+    saveLocalOnly();
+    if(!applyingRemote) pushToCloud();
+  }
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+  /* ============ CLOUD SYNC (Google Sheet — always on) ============
+     Fill in the two constants below with your own Apps Script web app
+     URL and secret word (see SETUP.md / the setup steps you were given)
+     and this file will automatically sync through that Google Sheet on
+     every load — no button, no setup screen. Leave them as-is and the
+     app just runs on localStorage only, same as before.
+
+     const SHEET_WEB_APP_URL = 'https://script.google.com/macros/s/XXXXXXXX/exec';
+     const SHEET_SECRET_TOKEN = 'your-secret-word';
+  */
+  const SHEET_WEB_APP_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+  const SHEET_SECRET_TOKEN = 'PASTE_YOUR_SECRET_WORD_HERE';
+
+  const POLL_INTERVAL_MS = 45000;
+  const CELL_SAFE_LIMIT = 45000; // Sheets cells cap out at 50,000 characters
+
+  const sheetConfigured =
+    /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(SHEET_WEB_APP_URL) &&
+    !!SHEET_SECRET_TOKEN && SHEET_SECRET_TOKEN !== 'PASTE_YOUR_SECRET_WORD_HERE';
+  const sheetConfig = sheetConfigured ? { url: SHEET_WEB_APP_URL, token: SHEET_SECRET_TOKEN } : null;
+
+  let syncStatus = 'off';   // internal only — drives retry/toast behavior, no visible indicator
+  let pollTimer = null;
+
+  async function fetchRemoteData(config){
+    const res = await fetch(config.url + '?token=' + encodeURIComponent(config.token), { method: 'GET' });
+    if(!res.ok) throw new Error('Sheet request failed (' + res.status + ')');
+    const json = await res.json();
+    if(json && json.error) throw new Error(json.error === 'unauthorized' ? 'Token was rejected by the script.' : json.error);
+    return { folders: json.folders || [], items: json.items || [] };
+  }
+
+  async function pushRemoteData(config, data){
+    const payload = JSON.stringify(data);
+    if(payload.length > CELL_SAFE_LIMIT){
+      showToast("You're close to the Google Sheet's storage limit — remove a few old stitches.");
+    }
+    const res = await fetch(config.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids a CORS preflight Apps Script can't handle
+      body: JSON.stringify({ token: config.token, data })
+    });
+    if(!res.ok) throw new Error('Sheet request failed (' + res.status + ')');
+    const json = await res.json();
+    if(json && json.error) throw new Error(json.error === 'unauthorized' ? 'Token was rejected by the script.' : json.error);
+    return json;
+  }
+
+  function startPolling(){
+    stopPolling();
+    pollTimer = setInterval(pollRemoteOnce, POLL_INTERVAL_MS);
+    document.addEventListener('visibilitychange', onVisibilityPoll);
+  }
+  function stopPolling(){
+    if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+    document.removeEventListener('visibilitychange', onVisibilityPoll);
+  }
+  function onVisibilityPoll(){
+    if(document.visibilityState === 'visible') pollRemoteOnce();
+  }
+  async function pollRemoteOnce(){
+    if(!sheetConfig) return;
+    try{
+      const remote = await fetchRemoteData(sheetConfig);
+      const remoteStr = JSON.stringify(remote);
+      const localStr = JSON.stringify({ folders: state.folders, items: state.items });
+      if(remoteStr !== localStr){
+        applyingRemote = true;
+        state = remote;
+        saveLocalOnly();
+        applyingRemote = false;
+        render();
+      }
+      syncStatus = 'on';
+    }catch(e){
+      // A single missed poll isn't worth interrupting the person with a toast.
+      console.warn('Sheet poll failed', e);
+    }
+  }
+
+  async function connectToSheet(){
+    if(!sheetConfig) return;
+    try{
+      const remote = await fetchRemoteData(sheetConfig);
+      const remoteHasData = remote.folders.length || remote.items.length;
+      const localHasData = state.folders.length || state.items.length;
+
+      if(!remoteHasData && localHasData){
+        // First time this file's synced from a device that already had stitches saved locally — seed the sheet with them.
+        await pushRemoteData(sheetConfig, state);
+      } else if(remoteHasData){
+        // The sheet already has data (from this or another device) — treat it as the source of truth.
+        applyingRemote = true;
+        state = remote;
+        saveLocalOnly();
+        applyingRemote = false;
+        render();
+      }
+      syncStatus = 'on';
+      startPolling();
+    }catch(e){
+      console.warn('Cloud sync failed', e);
+      syncStatus = 'error';
+      showToast("Couldn't reach your cloud sheet — saving locally for now.");
+    }
+  }
+
+  function pushToCloud(){
+    if(!sheetConfig) return;
+    pushRemoteData(sheetConfig, state).then(() => {
+      syncStatus = 'on';
+    }).catch(() => {
+      syncStatus = 'error';
+      showToast("Couldn't sync to the sheet — saved locally, will retry.");
+    });
+  }
+
+  /* ============ ROUTING ============ */
+  let route = { view: 'home' }; // {view:'home'} | {view:'folder', id} | {view:'all'}
+  let searchTerm = '';
+
+  /* ============ URL PARSING HELPERS ============ */
+  function normalizeUrl(raw){
+    let u = raw.trim();
+    if(!/^https?:\/\//i.test(u)) u = 'https://' + u;
+    return u;
+  }
+  function getYouTubeId(url){
+    const patterns = [
+      /youtu\.be\/([a-zA-Z0-9_-]{6,})/,
+      /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{6,})/,
+      /youtube\.com\/shorts\/([a-zA-Z0-9_-]{6,})/,
+      /youtube\.com\/embed\/([a-zA-Z0-9_-]{6,})/
+    ];
+    for(const p of patterns){
+      const m = url.match(p);
+      if(m) return m[1];
+    }
+    return null;
+  }
+  function getHostname(url){
+    try{ return new URL(url).hostname.replace(/^www\./,''); }
+    catch(e){ return url; }
+  }
+  function classifyUrl(raw){
+    const url = normalizeUrl(raw);
+    const ytId = getYouTubeId(url);
+    if(ytId) return { type:'youtube', videoId: ytId, url, hostname: getHostname(url) };
+    return { type:'website', url, hostname: getHostname(url) };
+  }
+
+  /* ============ RENDER: SHELL ============ */
+  const mainEl = document.getElementById('main');
+  const viewTitleEl = document.getElementById('viewTitle');
+  const topbarActionsEl = document.getElementById('topbarActions');
+  const backBtn = document.getElementById('backBtn');
+  const footerUtils = document.getElementById('footerUtils');
+
+  backBtn.addEventListener('click', () => { route = { view:'home' }; searchTerm=''; render(); });
+
+  function render(){
+    closeAnyDropdown();
+    if(route.view === 'home'){
+      backBtn.style.display = 'none';
+      viewTitleEl.textContent = 'My Stitches';
+      footerUtils.style.display = 'flex';
+      renderTopbarHome();
+      renderHome();
+    } else if(route.view === 'all'){
+      backBtn.style.display = 'inline-flex';
+      viewTitleEl.textContent = 'All Stitches';
+      footerUtils.style.display = 'none';
+      renderTopbarFolder(null);
+      renderItemListView(null);
+    } else if(route.view === 'folder'){
+      const folder = state.folders.find(f => f.id === route.id);
+      backBtn.style.display = 'inline-flex';
+      viewTitleEl.textContent = folder ? folder.name : 'Folder';
+      footerUtils.style.display = 'none';
+      renderTopbarFolder(route.id);
+      renderItemListView(route.id);
+    }
+  }
+
+  function renderTopbarHome(){
+    topbarActionsEl.innerHTML = `
+      <button class="pill-btn" id="newFolderBtn">${ICONS.folderPlus}<span>Folder</span></button>
+    `;
+    document.getElementById('newFolderBtn').addEventListener('click', openAddFolderModal);
+  }
+  function renderTopbarFolder(folderId){
+    topbarActionsEl.innerHTML = `
+      <button class="pill-btn primary" id="addLinkBtn">${ICONS.plus}<span>Add</span></button>
+    `;
+    document.getElementById('addLinkBtn').addEventListener('click', () => openAddItemModal(folderId));
+  }
+
+  /* ============ RENDER: HOME ============ */
+  function renderHome(){
+    const totalCount = state.items.length;
+    let html = `
+      <button class="all-card" id="allCard">
+        <div class="badge">${ICONS.grid}</div>
+        <div class="meta">
+          <div class="name">All Stitches</div>
+          <div class="count">${totalCount} ${totalCount===1?'link':'links'} saved</div>
+        </div>
+      </button>
+      <div class="section-label">Folders</div>
+    `;
+
+    if(state.folders.length === 0){
+      html += `
+        <div class="empty-state">
+          ${ICONS.folder}
+          <div class="title">No folders yet</div>
+          <div class="sub">Create a folder to start organizing your crochet stitches — like "Amigurumi" or "Baby Blankets".</div>
+        </div>
+      `;
+    } else {
+      html += `<div class="folder-grid">`;
+      state.folders.forEach(f => {
+        const count = state.items.filter(it => it.folderId === f.id).length;
+        html += `
+          <div class="folder-item" data-folder-id="${f.id}">
+            <div class="folder-icon">${ICONS.folder}</div>
+            <div class="folder-label">
+              <span class="name">${escapeHtml(f.name)}</span>
+              <button class="menu-btn" data-menu-folder="${f.id}" aria-label="Folder options">${ICONS.dots}</button>
+            </div>
+            <div class="count">${count} ${count===1?'stitch':'stitches'}</div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+
+    mainEl.innerHTML = html;
+
+    document.getElementById('allCard').addEventListener('click', () => { route = {view:'all'}; render(); });
+
+    mainEl.querySelectorAll('.folder-item').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if(e.target.closest('.menu-btn')) return;
+        route = { view:'folder', id: card.dataset.folderId };
+        render();
+      });
+    });
+    mainEl.querySelectorAll('[data-menu-folder]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openFolderMenu(btn, btn.dataset.menuFolder);
+      });
+    });
+  }
+
+  /* ============ RENDER: ITEM LIST (folder or all) ============ */
+  function renderItemListView(folderId){
+    let items = folderId ? state.items.filter(it => it.folderId === folderId) : state.items.slice();
+    items.sort((a,b) => b.addedAt - a.addedAt);
+
+    if(searchTerm.trim()){
+      const q = searchTerm.trim().toLowerCase();
+      items = items.filter(it => (it.title||'').toLowerCase().includes(q) || (it.hostname||'').toLowerCase().includes(q));
+    }
+
+    let html = `
+      <div class="search-wrap">
+        ${ICONS.search}
+        <input type="text" class="search-input" id="searchInput" placeholder="Search saved stitches..." value="${escapeHtml(searchTerm)}">
+      </div>
+    `;
+
+    if(items.length === 0){
+      const hasAnyBeforeSearch = folderId ? state.items.some(it=>it.folderId===folderId) : state.items.length>0;
+      html += `
+        <div class="empty-state">
+          ${ICONS.link}
+          <div class="title">${hasAnyBeforeSearch ? 'No matches' : 'Nothing saved here yet'}</div>
+          <div class="sub">${hasAnyBeforeSearch ? 'Try a different search term.' : 'Tap the + button to save a YouTube video or website with a stitch pattern.'}</div>
+        </div>
+      `;
+    } else {
+      html += `<div class="item-list">`;
+      items.forEach(it => {
+        html += renderItemRow(it, !folderId);
+      });
+      html += `</div>`;
+    }
+
+    mainEl.innerHTML = html;
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchTerm = e.target.value;
+      const scrollBefore = mainEl.scrollTop;
+      renderItemListView(folderId);
+      document.getElementById('searchInput').focus();
+      const val = document.getElementById('searchInput').value;
+      document.getElementById('searchInput').setSelectionRange(val.length, val.length);
+    });
+
+    mainEl.querySelectorAll('.item-row').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if(e.target.closest('.item-menu-btn')) return;
+        openItemDetail(row.dataset.itemId);
+      });
+    });
+    mainEl.querySelectorAll('[data-menu-item]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openItemMenu(btn, btn.dataset.menuItem);
+      });
+    });
+  }
+
+  function renderItemRow(it, showFolderTag){
+    const folder = state.folders.find(f => f.id === it.folderId);
+    let thumbHtml = '';
+    if(it.type === 'youtube'){
+      thumbHtml = `
+        <div class="item-thumb">
+          <img src="https://img.youtube.com/vi/${it.videoId}/mqdefault.jpg" alt="" loading="lazy">
+          <div class="play-badge">${ICONS.play}</div>
+        </div>`;
+    } else {
+      thumbHtml = `
+        <div class="item-thumb">
+          <img class="fav" src="https://www.google.com/s2/favicons?sz=128&domain_url=${encodeURIComponent(it.url)}" alt="" loading="lazy">
+        </div>`;
+    }
+    return `
+      <div class="item-row" data-item-id="${it.id}">
+        ${thumbHtml}
+        <div class="item-info">
+          <div class="item-title">${escapeHtml(it.title || it.hostname)}</div>
+          <div class="item-sub">
+            ${showFolderTag && folder ? `<span class="folder-tag">${escapeHtml(folder.name)}</span>` : ''}
+            <span>${it.type === 'youtube' ? 'YouTube' : escapeHtml(it.hostname)}</span>
+          </div>
+        </div>
+        <div class="item-row-actions">
+          <button class="item-menu-btn" data-menu-item="${it.id}" aria-label="Stitch options">${ICONS.dots}</button>
+        </div>
+        <span class="chev">${ICONS.chevRight}</span>
+      </div>
+    `;
+  }
+
+  /* ============ DROPDOWN MENUS ============ */
+  let activeDropdown = null;
+  function closeAnyDropdown(){
+    if(activeDropdown){ activeDropdown.remove(); activeDropdown = null; }
+    document.removeEventListener('click', onDocClickCloseDropdown, true);
+  }
+  function onDocClickCloseDropdown(e){
+    if(activeDropdown && !activeDropdown.contains(e.target)){ closeAnyDropdown(); }
+  }
+  function positionDropdown(dd, anchorBtn){
+    document.body.appendChild(dd);
+    const r = anchorBtn.getBoundingClientRect();
+    const ddWidth = 180;
+    let left = r.right - ddWidth + window.scrollX;
+    left = Math.max(10, Math.min(left, window.innerWidth - ddWidth - 10 + window.scrollX));
+    let top = r.bottom + 6 + window.scrollY;
+    dd.style.position = 'absolute';
+    dd.style.left = left + 'px';
+    dd.style.top = top + 'px';
+    dd.style.minWidth = ddWidth + 'px';
+  }
+
+  function openFolderMenu(anchorBtn, folderId){
+    closeAnyDropdown();
+    const dd = document.createElement('div');
+    dd.className = 'dropdown';
+    dd.innerHTML = `
+      <button data-act="rename">${ICONS.pencil}Rename</button>
+      <button data-act="delete" class="danger">${ICONS.trash}Delete folder</button>
+    `;
+    positionDropdown(dd, anchorBtn);
+    dd.querySelector('[data-act="rename"]').addEventListener('click', () => { closeAnyDropdown(); openRenameFolderModal(folderId); });
+    dd.querySelector('[data-act="delete"]').addEventListener('click', () => { closeAnyDropdown(); confirmDeleteFolder(folderId); });
+    activeDropdown = dd;
+    setTimeout(() => document.addEventListener('click', onDocClickCloseDropdown, true), 0);
+  }
+
+  function openItemMenu(anchorBtn, itemId){
+    closeAnyDropdown();
+    const dd = document.createElement('div');
+    dd.className = 'dropdown';
+    dd.innerHTML = `
+      <button data-act="edit">${ICONS.pencil}Edit</button>
+      <button data-act="move">${ICONS.move}Move to folder</button>
+      <button data-act="delete" class="danger">${ICONS.trash}Delete</button>
+    `;
+    positionDropdown(dd, anchorBtn);
+    dd.querySelector('[data-act="edit"]').addEventListener('click', () => { closeAnyDropdown(); openEditItemModal(itemId); });
+    dd.querySelector('[data-act="move"]').addEventListener('click', () => { closeAnyDropdown(); openMoveItemModal(itemId); });
+    dd.querySelector('[data-act="delete"]').addEventListener('click', () => { closeAnyDropdown(); confirmDeleteItem(itemId); });
+    activeDropdown = dd;
+    setTimeout(() => document.addEventListener('click', onDocClickCloseDropdown, true), 0);
+  }
+
+  /* ============ MODALS ============ */
+  const modalRoot = document.getElementById('modalRoot');
+  function closeModal(){ modalRoot.innerHTML = ''; document.removeEventListener('keydown', onEscClose); }
+  function onEscClose(e){ if(e.key === 'Escape') closeModal(); }
+  function openModal(innerHtml, {wide=false}={}){
+    modalRoot.innerHTML = `<div class="modal-overlay" id="overlay"><div class="modal">${innerHtml}</div></div>`;
+    document.getElementById('overlay').addEventListener('click', (e) => { if(e.target.id === 'overlay') closeModal(); });
+    document.addEventListener('keydown', onEscClose);
+    return modalRoot.querySelector('.modal');
+  }
+
+  function folderOptionsHtml(selectedId){
+    return state.folders.map(f => `<option value="${f.id}" ${f.id===selectedId?'selected':''}>${escapeHtml(f.name)}</option>`).join('');
+  }
+
+  /* ---- Add Folder ---- */
+  function openAddFolderModal(){
+    const m = openModal(`
+      <div class="modal-head"><h2>New folder</h2>
+        <button class="icon-btn" id="closeX" style="width:36px;height:36px;">${ICONS.x}</button>
+      </div>
+      <div class="field">
+        <label for="folderNameInput">Folder name</label>
+        <input type="text" id="folderNameInput" placeholder="e.g. Amigurumi" maxlength="40" autofocus>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelBtn">Cancel</button>
+        <button class="btn primary" id="saveBtn">Create folder</button>
+      </div>
+    `);
+    m.querySelector('#closeX').addEventListener('click', closeModal);
+    m.querySelector('#cancelBtn').addEventListener('click', closeModal);
+    const input = m.querySelector('#folderNameInput');
+    input.focus();
+    function submit(){
+      const name = input.value.trim();
+      if(!name){ input.focus(); return; }
+      const f = { id: uid(), name, createdAt: Date.now() };
+      state.folders.push(f);
+      saveState();
+      closeModal();
+      route = { view:'folder', id: f.id };
+      render();
+      showToast('Folder created');
+    }
+    m.querySelector('#saveBtn').addEventListener('click', submit);
+    input.addEventListener('keydown', (e) => { if(e.key === 'Enter') submit(); });
+  }
+
+  /* ---- Rename Folder ---- */
+  function openRenameFolderModal(folderId){
+    const folder = state.folders.find(f => f.id === folderId);
+    if(!folder) return;
+    const m = openModal(`
+      <div class="modal-head"><h2>Rename folder</h2>
+        <button class="icon-btn" id="closeX" style="width:36px;height:36px;">${ICONS.x}</button>
+      </div>
+      <div class="field">
+        <label for="folderNameInput">Folder name</label>
+        <input type="text" id="folderNameInput" maxlength="40" value="${escapeHtml(folder.name)}">
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelBtn">Cancel</button>
+        <button class="btn primary" id="saveBtn">Save</button>
+      </div>
+    `);
+    m.querySelector('#closeX').addEventListener('click', closeModal);
+    m.querySelector('#cancelBtn').addEventListener('click', closeModal);
+    const input = m.querySelector('#folderNameInput');
+    input.focus(); input.select();
+    function submit(){
+      const name = input.value.trim();
+      if(!name) { input.focus(); return; }
+      folder.name = name;
+      saveState();
+      closeModal();
+      render();
+      showToast('Folder renamed');
+    }
+    m.querySelector('#saveBtn').addEventListener('click', submit);
+    input.addEventListener('keydown', (e) => { if(e.key === 'Enter') submit(); });
+  }
+
+  function confirmDeleteFolder(folderId){
+    const folder = state.folders.find(f => f.id === folderId);
+    if(!folder) return;
+    const count = state.items.filter(it => it.folderId === folderId).length;
+    const m = openModal(`
+      <div class="confirm-modal">
+        <div class="icon-wrap">${ICONS.warn}</div>
+        <h2>Delete "${escapeHtml(folder.name)}"?</h2>
+        <p>${count > 0 ? `This will also delete ${count} saved ${count===1?'stitch':'stitches'} inside it.` : 'This folder is empty.'} This can't be undone.</p>
+        <div class="modal-actions">
+          <button class="btn secondary" id="cancelBtn">Cancel</button>
+          <button class="btn danger" id="deleteBtn">Delete</button>
+        </div>
+      </div>
+    `);
+    m.querySelector('#cancelBtn').addEventListener('click', closeModal);
+    m.querySelector('#deleteBtn').addEventListener('click', () => {
+      state.items = state.items.filter(it => it.folderId !== folderId);
+      state.folders = state.folders.filter(f => f.id !== folderId);
+      saveState();
+      closeModal();
+      route = { view:'home' };
+      render();
+      showToast('Folder deleted');
+    });
+  }
+
+  /* ---- Add Item ---- */
+  function openAddItemModal(presetFolderId){
+    if(state.folders.length === 0){
+      openAddFolderModal();
+      showToast('Create a folder first, then add your stitch');
+      return;
+    }
+    const defaultFolder = presetFolderId || state.folders[0].id;
+    const m = openModal(`
+      <div class="modal-head"><h2>Save a stitch</h2>
+        <button class="icon-btn" id="closeX" style="width:36px;height:36px;">${ICONS.x}</button>
+      </div>
+      <div class="field">
+        <label for="urlInput">Link (YouTube video or website)</label>
+        <input type="url" id="urlInput" placeholder="https://youtube.com/watch?v=..." autofocus>
+      </div>
+      <div class="field">
+        <label for="titleInput">Title <span style="font-weight:400;">(optional)</span></label>
+        <input type="text" id="titleInput" placeholder="e.g. Granny Square Tutorial" maxlength="80">
+      </div>
+      <div class="field">
+        <label for="folderSelect">Folder</label>
+        <select id="folderSelect">${folderOptionsHtml(defaultFolder)}</select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelBtn">Cancel</button>
+        <button class="btn primary" id="saveBtn">Save stitch</button>
+      </div>
+    `);
+    m.querySelector('#closeX').addEventListener('click', closeModal);
+    m.querySelector('#cancelBtn').addEventListener('click', closeModal);
+    const urlInput = m.querySelector('#urlInput');
+    const titleInput = m.querySelector('#titleInput');
+    urlInput.focus();
+
+    function submit(){
+      const raw = urlInput.value.trim();
+      if(!raw){ urlInput.focus(); return; }
+      let info;
+      try{ info = classifyUrl(raw); } catch(e){ urlInput.focus(); return; }
+      const item = {
+        id: uid(),
+        folderId: m.querySelector('#folderSelect').value,
+        url: info.url,
+        type: info.type,
+        videoId: info.videoId || null,
+        hostname: info.hostname,
+        title: titleInput.value.trim(),
+        addedAt: Date.now()
+      };
+      state.items.push(item);
+      saveState();
+      closeModal();
+      render();
+      showToast('Stitch saved');
+    }
+    m.querySelector('#saveBtn').addEventListener('click', submit);
+    [urlInput, titleInput].forEach(inp => inp.addEventListener('keydown', (e) => { if(e.key === 'Enter') submit(); }));
+  }
+
+  /* ---- Edit Item ---- */
+  function openEditItemModal(itemId){
+    const item = state.items.find(it => it.id === itemId);
+    if(!item) return;
+    const m = openModal(`
+      <div class="modal-head"><h2>Edit stitch</h2>
+        <button class="icon-btn" id="closeX" style="width:36px;height:36px;">${ICONS.x}</button>
+      </div>
+      <div class="field">
+        <label for="urlInput">Link</label>
+        <input type="url" id="urlInput" value="${escapeHtml(item.url)}">
+      </div>
+      <div class="field">
+        <label for="titleInput">Title</label>
+        <input type="text" id="titleInput" value="${escapeHtml(item.title||'')}" maxlength="80">
+      </div>
+      <div class="field">
+        <label for="folderSelect">Folder</label>
+        <select id="folderSelect">${folderOptionsHtml(item.folderId)}</select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelBtn">Cancel</button>
+        <button class="btn primary" id="saveBtn">Save changes</button>
+      </div>
+    `);
+    m.querySelector('#closeX').addEventListener('click', closeModal);
+    m.querySelector('#cancelBtn').addEventListener('click', closeModal);
+    const urlInput = m.querySelector('#urlInput');
+    const titleInput = m.querySelector('#titleInput');
+
+    function submit(){
+      const raw = urlInput.value.trim();
+      if(!raw){ urlInput.focus(); return; }
+      const info = classifyUrl(raw);
+      item.url = info.url;
+      item.type = info.type;
+      item.videoId = info.videoId || null;
+      item.hostname = info.hostname;
+      item.title = titleInput.value.trim();
+      item.folderId = m.querySelector('#folderSelect').value;
+      saveState();
+      closeModal();
+      render();
+      showToast('Changes saved');
+    }
+    m.querySelector('#saveBtn').addEventListener('click', submit);
+  }
+
+  /* ---- Move Item ---- */
+  function openMoveItemModal(itemId){
+    const item = state.items.find(it => it.id === itemId);
+    if(!item) return;
+    const m = openModal(`
+      <div class="modal-head"><h2>Move to folder</h2>
+        <button class="icon-btn" id="closeX" style="width:36px;height:36px;">${ICONS.x}</button>
+      </div>
+      <div class="field">
+        <label for="folderSelect">Folder</label>
+        <select id="folderSelect">${folderOptionsHtml(item.folderId)}</select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelBtn">Cancel</button>
+        <button class="btn primary" id="saveBtn">Move</button>
+      </div>
+    `);
+    m.querySelector('#closeX').addEventListener('click', closeModal);
+    m.querySelector('#cancelBtn').addEventListener('click', closeModal);
+    m.querySelector('#saveBtn').addEventListener('click', () => {
+      item.folderId = m.querySelector('#folderSelect').value;
+      saveState();
+      closeModal();
+      render();
+      showToast('Stitch moved');
+    });
+  }
+
+  function confirmDeleteItem(itemId){
+    const item = state.items.find(it => it.id === itemId);
+    if(!item) return;
+    const m = openModal(`
+      <div class="confirm-modal">
+        <div class="icon-wrap">${ICONS.warn}</div>
+        <h2>Delete this stitch?</h2>
+        <p>"${escapeHtml(item.title || item.hostname)}" will be removed. This can't be undone.</p>
+        <div class="modal-actions">
+          <button class="btn secondary" id="cancelBtn">Cancel</button>
+          <button class="btn danger" id="deleteBtn">Delete</button>
+        </div>
+      </div>
+    `);
+    m.querySelector('#cancelBtn').addEventListener('click', closeModal);
+    m.querySelector('#deleteBtn').addEventListener('click', () => {
+      state.items = state.items.filter(it => it.id !== itemId);
+      saveState();
+      closeModal();
+      render();
+      showToast('Stitch deleted');
+    });
+  }
+
+  /* ---- Item Detail ---- */
+  function openItemDetail(itemId){
+    const item = state.items.find(it => it.id === itemId);
+    if(!item) return;
+    const folder = state.folders.find(f => f.id === item.folderId);
+
+    let mediaHtml;
+    if(item.type === 'youtube'){
+      mediaHtml = `
+        <div class="detail-media">
+          <div class="yt-frame-wrap">
+            <iframe src="https://www.youtube.com/embed/${item.videoId}" title="${escapeHtml(item.title||'YouTube video')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+          </div>
+        </div>`;
+    } else {
+      mediaHtml = `
+        <div class="detail-media">
+          <div class="site-hero">
+            <img src="https://www.google.com/s2/favicons?sz=128&domain_url=${encodeURIComponent(item.url)}" alt="">
+            <div class="host">${escapeHtml(item.hostname)}</div>
+          </div>
+        </div>`;
+    }
+
+    const m = openModal(`
+      <div class="modal-head">
+        <h2>Stitch details</h2>
+        <button class="icon-btn" id="closeX" style="width:36px;height:36px;">${ICONS.x}</button>
+      </div>
+      ${mediaHtml}
+      <div class="detail-title">${escapeHtml(item.title || item.hostname)}</div>
+      <div class="detail-sub">${folder ? escapeHtml(folder.name) + ' · ' : ''}${item.type === 'youtube' ? 'YouTube' : escapeHtml(item.hostname)}</div>
+      <div class="detail-actions">
+        <a class="btn primary" href="${escapeAttr(item.url)}" target="_blank" rel="noopener noreferrer">${ICONS.externalLink}Open link</a>
+        <button class="btn secondary" id="editBtn">${ICONS.pencil}Edit</button>
+        <button class="btn secondary" id="moveBtn">${ICONS.move}Move</button>
+        <button class="btn danger" id="deleteBtn">${ICONS.trash}Delete</button>
+      </div>
+    `);
+    m.querySelector('#closeX').addEventListener('click', closeModal);
+    m.querySelector('#editBtn').addEventListener('click', () => { closeModal(); openEditItemModal(itemId); });
+    m.querySelector('#moveBtn').addEventListener('click', () => { closeModal(); openMoveItemModal(itemId); });
+    m.querySelector('#deleteBtn').addEventListener('click', () => { closeModal(); confirmDeleteItem(itemId); });
+  }
+
+  /* ============ TOAST ============ */
+  let toastTimer = null;
+  function showToast(msg){
+    const root = document.getElementById('toastRoot');
+    root.innerHTML = `<div class="toast">${escapeHtml(msg)}</div>`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { root.innerHTML = ''; }, 2200);
+  }
+
+  /* ============ UTIL ============ */
+  function escapeHtml(str){
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function escapeAttr(str){ return escapeHtml(str); }
+
+  /* ============ FAB / EXPORT / IMPORT ============ */
+  document.getElementById('fabAdd').addEventListener('click', () => {
+    const presetFolder = route.view === 'folder' ? route.id : null;
+    openAddItemModal(presetFolder);
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = `stitch-keeper-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast('Backup downloaded');
+  });
+
+  const importFileInput = document.getElementById('importFile');
+  document.getElementById('importBtn').addEventListener('click', () => importFileInput.click());
+  importFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const parsed = JSON.parse(reader.result);
+        if(!parsed || !Array.isArray(parsed.folders) || !Array.isArray(parsed.items)){
+          throw new Error('bad shape');
+        }
+        openImportConfirm(parsed);
+      }catch(err){
+        showToast("That file doesn't look like a valid backup.");
+      }
+      importFileInput.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  function openImportConfirm(parsed){
+    const m = openModal(`
+      <div class="confirm-modal">
+        <div class="icon-wrap">${ICONS.warn}</div>
+        <h2>Restore this backup?</h2>
+        <p>This will replace everything currently saved (${state.folders.length} folders, ${state.items.length} stitches) with the backup (${parsed.folders.length} folders, ${parsed.items.length} stitches).</p>
+        <div class="modal-actions">
+          <button class="btn secondary" id="cancelBtn">Cancel</button>
+          <button class="btn primary" id="restoreBtn">Restore</button>
+        </div>
+      </div>
+    `);
+    m.querySelector('#cancelBtn').addEventListener('click', closeModal);
+    m.querySelector('#restoreBtn').addEventListener('click', () => {
+      state = { folders: parsed.folders, items: parsed.items };
+      saveState();
+      closeModal();
+      route = { view:'home' };
+      render();
+      showToast('Backup restored');
+    });
+  }
+
+  /* ============ INIT ============ */
+  loadState();
+  render();
+
+  connectToSheet(); // no-ops silently if SHEET_WEB_APP_URL / SHEET_SECRET_TOKEN haven't been filled in
+})();
+</script>
+</body>
+</html>
